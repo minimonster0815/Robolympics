@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abstimmung</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    .container {
+      text-align: center;
+    }
+    .button {
+      display: inline-block;
+      margin: 10px;
+      padding: 20px;
+      background-color: #007BFF;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    .button:disabled {
+      background-color: grey;
+    }
+    .results {
+      margin-top: 20px;
+      font-size: 24px;
+      display: none; /* Standardmäßig ausgeblendet */
+    }
+    .countdown {
+      font-size: 18px;
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body onload="enterFullscreen()">
+
+  <div class="container">
+    <h1>Wähle eine Option:</h1>
+
+    <button class="button" id="buttonA" onclick="vote('A')">A</button>
+    <button class="button" id="buttonB" onclick="vote('B')">B</button>
+    <button class="button" id="buttonC" onclick="vote('C')">C</button>
+    <button class="button" id="buttonD" onclick="vote('D')">D</button>
+
+    <div class="results" id="results"></div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+
+  <script>
+    const votes = { A: 0, B: 0, C: 0, D: 0 };
+    let countdownInterval;
+
+    function vote(option) {
+      votes[option]++;
+      startCountdown();
+    }
+
+    function showResults() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.style.display = 'block'; // Ergebnisse anzeigen
+      resultsDiv.innerHTML = `
+        Zwischenergebnis:<br>
+        A: ${votes.A}<br>
+        B: ${votes.B}<br>
+        C: ${votes.C}<br>
+        D: ${votes.D}
+      `;
+    }
+
+    function hideResults() {
+      document.getElementById('results').style.display = 'none'; // Ergebnisse ausblenden
+    }
+
+    function startCountdown() {
+      let countdown = 3;
+      disableButtons(true);
+      showResults(); // Ergebnisse während des Countdowns anzeigen
+      const countdownDiv = document.getElementById('countdown');
+      countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
+
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        countdown--;
+        countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          countdownDiv.textContent = '';
+          hideResults(); // Ergebnisse nach Countdown ausblenden
+          disableButtons(false);
+        }
+      }, 1000);
+    }
+
+    function disableButtons(disable) {
+      document.querySelectorAll('.button').forEach(button => {
+        button.disabled = disable;
+      });
+    }
+
+    function enterFullscreen() {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.mozRequestFullScreen) { // Firefox
+        elem.mozRequestFullScreen();
+      } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) { // IE/Edge
+        elem.msRequestFullscreen();
+      }
+    }
+  </script>
+
+</body>
+</html>
