@@ -13,23 +13,23 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: 'Helvetica Neue', Arial, sans-serif; /* Modernere Schrift */
+      font-family: 'Helvetica Neue', Arial, sans-serif;
       background-color: #f4f4f4;
     }
     .container {
       text-align: center;
     }
     h1 {
-      font-size: 48px; /* Vergrößerte Schrift für die Überschrift */
-      margin-bottom: 40px; /* Verdoppelter Abstand zur Überschrift */
-      font-weight: 600; /* Modernes, fettes Design */
+      font-size: 48px;
+      margin-bottom: 40px;
+      font-weight: 600;
     }
     .button {
       display: inline-block;
-      margin: 20px; /* Verdoppelter Abstand zwischen den Buttons */
-      padding: 40px; /* Große Buttons */
+      margin: 20px;
+      padding: 40px;
       color: white;
-      font-size: 80px; /* Große Emojis */
+      font-size: 80px;
       cursor: pointer;
       border: none;
       border-radius: 10px;
@@ -37,10 +37,10 @@
       height: 200px;
       text-align: center;
       line-height: 1.2;
-      transition: transform 0.2s ease; /* Sanfter Hover-Effekt */
+      transition: transform 0.2s ease;
     }
     .button:hover {
-      transform: scale(1.1); /* Vergrößert Button beim Hover */
+      transform: scale(1.1);
     }
     .button:disabled {
       background-color: grey;
@@ -56,21 +56,21 @@
       background-color: #28a745;
     }
     .results {
-      margin-top: 30px; /* Größerer Abstand zu den Ergebnissen */
-      font-size: 28px; /* Vergrößerte Schrift für Ergebnisse */
+      margin-top: 30px;
+      font-size: 28px;
       display: none;
     }
     .countdown {
-      font-size: 24px; /* Größere Countdown-Schrift */
+      font-size: 24px;
       color: red;
       margin-top: 10px;
     }
   </style>
 </head>
-<body onload="enterFullscreen()">
+<body onload="initializePage()">
 
   <div class="container">
-    <h1>I LIKE THE EVENT ?</h1>
+    <h1>Wie fühlst du dich?</h1>
 
     <button class="button red" id="buttonSad" onclick="vote('Sad')">😢</button>
     <button class="button yellow" id="buttonNeutral" onclick="vote('Neutral')">😐</button>
@@ -83,9 +83,24 @@
   <script>
     const votes = { Sad: 0, Neutral: 0, Happy: 0 };
     let countdownInterval;
+    let countdown = 0;
+
+    function initializePage() {
+      // Countdown-Wert aus localStorage laden oder auf 0 setzen
+      countdown = localStorage.getItem('countdown') ? parseInt(localStorage.getItem('countdown')) : 0;
+
+      if (countdown > 0) {
+        startCountdown(); // Startet Countdown mit verbleibendem Wert
+      } else {
+        document.getElementById('countdown').textContent = '';
+      }
+
+      enterFullscreen();
+    }
 
     function vote(option) {
       votes[option]++;
+      countdown = 3; // Countdown auf 3 Sekunden setzen
       startCountdown();
     }
 
@@ -105,23 +120,32 @@
     }
 
     function startCountdown() {
-      let countdown = 3;
       disableButtons(true);
       showResults();
-      const countdownDiv = document.getElementById('countdown');
-      countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
+      updateCountdownDisplay();
 
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         countdown--;
-        countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
+        localStorage.setItem('countdown', countdown); // Countdown-Wert speichern
+        updateCountdownDisplay();
+
         if (countdown <= 0) {
           clearInterval(countdownInterval);
-          countdownDiv.textContent = '';
+          localStorage.setItem('countdown', 0); // Countdown zurücksetzen
           hideResults();
           disableButtons(false);
         }
       }, 1000);
+    }
+
+    function updateCountdownDisplay() {
+      const countdownDiv = document.getElementById('countdown');
+      if (countdown > 0) {
+        countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
+      } else {
+        countdownDiv.textContent = '';
+      }
     }
 
     function disableButtons(disable) {
@@ -134,11 +158,11 @@
       const elem = document.documentElement;
       if (elem.requestFullscreen) {
         elem.requestFullscreen();
-      } else if (elem.mozRequestFullScreen) { // Firefox
+      } else if (elem.mozRequestFullScreen) {
         elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+      } else if (elem.webkitRequestFullscreen) {
         elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) { // IE/Edge
+      } else if (elem.msRequestFullscreen) {
         elem.msRequestFullscreen();
       }
     }
