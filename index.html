@@ -70,7 +70,7 @@
 <body onload="initializePage()">
 
   <div class="container">
-    <h1>Wie fühlst du dich?</h1>
+    <h1>I LIKE THE EVENT</h1>
 
     <button class="button red" id="buttonSad" onclick="vote('Sad')">😢</button>
     <button class="button yellow" id="buttonNeutral" onclick="vote('Neutral')">😐</button>
@@ -81,71 +81,86 @@
   </div>
 
   <script>
-    const votes = { Sad: 0, Neutral: 0, Happy: 0 };
+    let votes = { Sad: 0, Neutral: 0, Happy: 0 };
     let countdownInterval;
-    let countdown = 0;
+    let resetCheck = { redPressed: false, greenPressed: false };
 
     function initializePage() {
-      // Countdown-Wert aus localStorage laden oder auf 0 setzen
-      countdown = localStorage.getItem('countdown') ? parseInt(localStorage.getItem('countdown')) : 0;
-
-      if (countdown > 0) {
-        startCountdown(); // Startet Countdown mit verbleibendem Wert
-      } else {
-        document.getElementById('countdown').textContent = '';
+      // Ergebnisse aus localStorage laden
+      const storedVotes = localStorage.getItem('votes');
+      if (storedVotes) {
+        votes = JSON.parse(storedVotes);
       }
 
+      showResults();
       enterFullscreen();
     }
 
     function vote(option) {
       votes[option]++;
-      countdown = 3; // Countdown auf 3 Sekunden setzen
+      saveVotes();
       startCountdown();
+    }
+
+    function saveVotes() {
+      localStorage.setItem('votes', JSON.stringify(votes));
+    }
+
+    function resetVotes() {
+      votes = { Sad: 0, Neutral: 0, Happy: 0 };
+      saveVotes();
+      showResults();
+      alert("Die Ergebnisse wurden zurückgesetzt!");
+    }
+
+    function checkReset(button) {
+      if (button === 'red') {
+        resetCheck.redPressed = true;
+      } else if (button === 'green') {
+        resetCheck.greenPressed = true;
+      }
+
+      // Wenn beide Tasten gleichzeitig gedrückt werden
+      if (resetCheck.redPressed && resetCheck.greenPressed) {
+        resetVotes();
+        resetCheck.redPressed = false;
+        resetCheck.greenPressed = false;
+      }
+
+      // Timer zurücksetzen, falls Tasten nicht gleichzeitig gedrückt
+      setTimeout(() => {
+        resetCheck.redPressed = false;
+        resetCheck.greenPressed = false;
+      }, 1000);
     }
 
     function showResults() {
       const resultsDiv = document.getElementById('results');
       resultsDiv.style.display = 'block';
       resultsDiv.innerHTML = `
-        Zwischenergebnis:<br>
+        Aktuelles Ergebnis:<br>
         😢 (Traurig): ${votes.Sad}<br>
         😐 (Neutral): ${votes.Neutral}<br>
         😊 (Glücklich): ${votes.Happy}
       `;
     }
 
-    function hideResults() {
-      document.getElementById('results').style.display = 'none';
-    }
-
     function startCountdown() {
+      let countdown = 3;
       disableButtons(true);
-      showResults();
-      updateCountdownDisplay();
+      const countdownDiv = document.getElementById('countdown');
+      countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
 
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         countdown--;
-        localStorage.setItem('countdown', countdown); // Countdown-Wert speichern
-        updateCountdownDisplay();
-
+        countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
         if (countdown <= 0) {
           clearInterval(countdownInterval);
-          localStorage.setItem('countdown', 0); // Countdown zurücksetzen
-          hideResults();
+          countdownDiv.textContent = '';
           disableButtons(false);
         }
       }, 1000);
-    }
-
-    function updateCountdownDisplay() {
-      const countdownDiv = document.getElementById('countdown');
-      if (countdown > 0) {
-        countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
-      } else {
-        countdownDiv.textContent = '';
-      }
     }
 
     function disableButtons(disable) {
@@ -153,6 +168,9 @@
         button.disabled = disable;
       });
     }
+
+    document.getElementById('buttonSad').addEventListener('click', () => checkReset('red'));
+    document.getElementById('buttonHappy').addEventListener('click', () => checkReset('green'));
 
     function enterFullscreen() {
       const elem = document.documentElement;
