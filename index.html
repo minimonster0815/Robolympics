@@ -65,13 +65,14 @@
       font-size: 24px;
       color: red;
       margin-top: 10px;
+      display: none;
     }
   </style>
 </head>
 <body onload="initializePage()">
 
   <div class="container">
-    <h1 onclick="resetVotes()">Wie fühlst du dich?</h1>
+    <h1 onclick="confirmReset()">Wie fühlst du dich?</h1>
 
     <button class="button red" id="buttonSad" onclick="vote('Sad')">😢</button>
     <button class="button yellow" id="buttonNeutral" onclick="vote('Neutral')">😐</button>
@@ -86,7 +87,6 @@
     let countdownInterval;
 
     function initializePage() {
-      // Ergebnisse aus localStorage laden
       const storedVotes = localStorage.getItem('votes');
       if (storedVotes) {
         votes = JSON.parse(storedVotes);
@@ -97,12 +97,18 @@
     function vote(option) {
       votes[option]++;
       saveVotes();
-      showResults(); // Zeige die Ergebnisse nach einer Wahl
+      showResults();
       startCountdown();
     }
 
     function saveVotes() {
       localStorage.setItem('votes', JSON.stringify(votes));
+    }
+
+    function confirmReset() {
+      if (confirm("Sind Sie sicher, dass Sie die Ergebnisse zurücksetzen möchten?")) {
+        resetVotes();
+      }
     }
 
     function resetVotes() {
@@ -131,6 +137,7 @@
       let countdown = 3;
       disableButtons(true);
       const countdownDiv = document.getElementById('countdown');
+      countdownDiv.style.display = 'block'; // Countdown sichtbar machen
       countdownDiv.textContent = `Ergebnisse werden in ${countdown} Sekunden angezeigt...`;
 
       clearInterval(countdownInterval);
@@ -139,8 +146,7 @@
         countdownDiv.textContent = `Ergebnisse werden in ${countdown} Sekunden angezeigt...`;
         if (countdown <= 0) {
           clearInterval(countdownInterval);
-          countdownDiv.textContent = '';
-          showResults(); // Zeige Ergebnisse nach dem Countdown
+          countdownDiv.style.display = 'none'; // Countdown ausblenden
           disableButtons(false);
         }
       }, 1000);
