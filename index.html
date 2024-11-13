@@ -43,9 +43,13 @@
     .button:hover {
       transform: scale(1.1);
     }
+    .button:active {
+      transform: scale(1.1); /* Kurz vergrößern bei Klick */
+    }
     .button:disabled {
       background-color: grey;
       cursor: not-allowed;
+      transform: scale(1); /* Originalgröße wiederherstellen */
     }
     .button.red {
       background-color: #ff4d4d;
@@ -59,20 +63,20 @@
     .results {
       margin-top: 30px;
       font-size: 28px;
-      display: none;
+      display: none; /* Standardmäßig ausgeblendet */
     }
     .countdown {
       font-size: 24px;
       color: red;
       margin-top: 10px;
-      display: none;
+      display: none; /* Countdown wird nur bei Bedarf sichtbar */
     }
   </style>
 </head>
 <body onload="initializePage()">
 
   <div class="container">
-    <h1 onclick="confirmReset()">Wie fühlst du dich?</h1>
+    <h1 onclick="confirmReset()">I LIKE THE EVENT</h1>
 
     <button class="button red" id="buttonSad" onclick="vote('Sad')">😢</button>
     <button class="button yellow" id="buttonNeutral" onclick="vote('Neutral')">😐</button>
@@ -97,7 +101,7 @@
     function vote(option) {
       votes[option]++;
       saveVotes();
-      showResults();
+      showResultsTemporarily();
       startCountdown();
     }
 
@@ -118,7 +122,7 @@
       alert("Die Ergebnisse wurden zurückgesetzt!");
     }
 
-    function showResults() {
+    function showResultsTemporarily() {
       const resultsDiv = document.getElementById('results');
       resultsDiv.style.display = 'block';
       resultsDiv.innerHTML = `
@@ -137,7 +141,7 @@
       let countdown = 3;
       disableButtons(true);
       const countdownDiv = document.getElementById('countdown');
-      countdownDiv.style.display = 'block'; // Countdown sichtbar machen
+      countdownDiv.style.display = 'block';
       countdownDiv.textContent = `Ergebnisse werden in ${countdown} Sekunden angezeigt...`;
 
       clearInterval(countdownInterval);
@@ -147,6 +151,7 @@
         if (countdown <= 0) {
           clearInterval(countdownInterval);
           countdownDiv.style.display = 'none'; // Countdown ausblenden
+          hideResults(); // Ergebnisse ausblenden
           disableButtons(false);
         }
       }, 1000);
@@ -155,6 +160,9 @@
     function disableButtons(disable) {
       document.querySelectorAll('.button').forEach(button => {
         button.disabled = disable;
+        if (!disable) {
+          button.style.transform = "scale(1)"; // Originalgröße wiederherstellen
+        }
       });
     }
 
