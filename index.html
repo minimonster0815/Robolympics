@@ -142,12 +142,12 @@
       disableButtons(true);
       const countdownDiv = document.getElementById('countdown');
       countdownDiv.style.display = 'block';
-      countdownDiv.textContent = `Ergebnisse werden in ${countdown} Sekunden angezeigt...`;
+      countdownDiv.textContent = `Ergebnisse werden ${countdown} Sekunden angezeigt...`;
 
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         countdown--;
-        countdownDiv.textContent = `Ergebnisse werden in ${countdown} Sekunden angezeigt...`;
+        countdownDiv.textContent = `Ergebnisse werden ${countdown} Sekunden angezeigt...`;
         if (countdown <= 0) {
           clearInterval(countdownInterval);
           countdownDiv.style.display = 'none'; // Countdown ausblenden
