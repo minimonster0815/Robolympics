@@ -23,6 +23,7 @@
       font-size: 48px;
       margin-bottom: 40px;
       font-weight: 600;
+      cursor: pointer;
     }
     .button {
       display: inline-block;
@@ -70,7 +71,7 @@
 <body onload="initializePage()">
 
   <div class="container">
-    <h1>I LIKE THE EVENT</h1>
+    <h1 onclick="resetVotes()">Wie fühlst du dich?</h1>
 
     <button class="button red" id="buttonSad" onclick="vote('Sad')">😢</button>
     <button class="button yellow" id="buttonNeutral" onclick="vote('Neutral')">😐</button>
@@ -83,7 +84,6 @@
   <script>
     let votes = { Sad: 0, Neutral: 0, Happy: 0 };
     let countdownInterval;
-    let resetCheck = { redPressed: false, greenPressed: false };
 
     function initializePage() {
       // Ergebnisse aus localStorage laden
@@ -91,14 +91,13 @@
       if (storedVotes) {
         votes = JSON.parse(storedVotes);
       }
-
-      showResults();
       enterFullscreen();
     }
 
     function vote(option) {
       votes[option]++;
       saveVotes();
+      showResults(); // Zeige die Ergebnisse nach einer Wahl
       startCountdown();
     }
 
@@ -109,29 +108,8 @@
     function resetVotes() {
       votes = { Sad: 0, Neutral: 0, Happy: 0 };
       saveVotes();
-      showResults();
+      hideResults();
       alert("Die Ergebnisse wurden zurückgesetzt!");
-    }
-
-    function checkReset(button) {
-      if (button === 'red') {
-        resetCheck.redPressed = true;
-      } else if (button === 'green') {
-        resetCheck.greenPressed = true;
-      }
-
-      // Wenn beide Tasten gleichzeitig gedrückt werden
-      if (resetCheck.redPressed && resetCheck.greenPressed) {
-        resetVotes();
-        resetCheck.redPressed = false;
-        resetCheck.greenPressed = false;
-      }
-
-      // Timer zurücksetzen, falls Tasten nicht gleichzeitig gedrückt
-      setTimeout(() => {
-        resetCheck.redPressed = false;
-        resetCheck.greenPressed = false;
-      }, 1000);
     }
 
     function showResults() {
@@ -145,19 +123,24 @@
       `;
     }
 
+    function hideResults() {
+      document.getElementById('results').style.display = 'none';
+    }
+
     function startCountdown() {
       let countdown = 3;
       disableButtons(true);
       const countdownDiv = document.getElementById('countdown');
-      countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
+      countdownDiv.textContent = `Ergebnisse werden in ${countdown} Sekunden angezeigt...`;
 
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         countdown--;
-        countdownDiv.textContent = `Nächste Wahlmöglichkeit in ${countdown}...`;
+        countdownDiv.textContent = `Ergebnisse werden in ${countdown} Sekunden angezeigt...`;
         if (countdown <= 0) {
           clearInterval(countdownInterval);
           countdownDiv.textContent = '';
+          showResults(); // Zeige Ergebnisse nach dem Countdown
           disableButtons(false);
         }
       }, 1000);
@@ -168,9 +151,6 @@
         button.disabled = disable;
       });
     }
-
-    document.getElementById('buttonSad').addEventListener('click', () => checkReset('red'));
-    document.getElementById('buttonHappy').addEventListener('click', () => checkReset('green'));
 
     function enterFullscreen() {
       const elem = document.documentElement;
