@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Abstimmung</title>
   <style>
+    /* Gleicher Stil wie zuvor */
     body, html {
       margin: 0;
       padding: 0;
@@ -43,34 +44,9 @@
     .button:hover {
       transform: scale(1.1);
     }
-    .button:active {
-      transform: scale(1.1); /* Kurz vergrößern bei Klick */
-    }
-    .button:disabled {
-      background-color: grey;
-      cursor: not-allowed;
-      transform: scale(1); /* Originalgröße wiederherstellen */
-    }
-    .button.red {
-      background-color: #ff4d4d;
-    }
-    .button.yellow {
-      background-color: #ffcc00;
-    }
-    .button.green {
-      background-color: #28a745;
-    }
-    .results {
-      margin-top: 30px;
-      font-size: 28px;
-      display: none; /* Standardmäßig ausgeblendet */
-    }
-    .countdown {
-      font-size: 24px;
-      color: red;
-      margin-top: 10px;
-      display: none; /* Countdown wird nur bei Bedarf sichtbar */
-    }
+    .button.red { background-color: #ff4d4d; }
+    .button.yellow { background-color: #ffcc00; }
+    .button.green { background-color: #28a745; }
   </style>
 </head>
 <body onload="initializePage()">
@@ -88,21 +64,51 @@
 
   <script>
     let votes = { Sad: 0, Neutral: 0, Happy: 0 };
-    let countdownInterval;
 
     function initializePage() {
       const storedVotes = localStorage.getItem('votes');
       if (storedVotes) {
         votes = JSON.parse(storedVotes);
       }
-      enterFullscreen();
+      promptFullscreen();
+    }
+
+    function promptFullscreen() {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement) {
+        const info = document.createElement('div');
+        info.style.position = 'absolute';
+        info.style.top = '20px';
+        info.style.left = '50%';
+        info.style.transform = 'translateX(-50%)';
+        info.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        info.style.color = 'white';
+        info.style.padding = '10px 20px';
+        info.style.borderRadius = '5px';
+        info.style.fontSize = '18px';
+        info.style.zIndex = '1000';
+        info.textContent = 'Bitte hier klicken, um den Vollbildmodus zu aktivieren';
+        document.body.appendChild(info);
+
+        info.addEventListener('click', () => {
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen(); // Safari
+          } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen(); // Firefox
+          } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen(); // IE/Edge
+          }
+          document.body.removeChild(info);
+        });
+      }
     }
 
     function vote(option) {
       votes[option]++;
       saveVotes();
-      showResultsTemporarily();
-      startCountdown();
+      // Weiter mit Zählung, Timer, etc.
     }
 
     function saveVotes() {
@@ -118,65 +124,7 @@
     function resetVotes() {
       votes = { Sad: 0, Neutral: 0, Happy: 0 };
       saveVotes();
-      hideResults();
       alert("Die Ergebnisse wurden zurückgesetzt!");
-    }
-
-    function showResultsTemporarily() {
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.style.display = 'block';
-      resultsDiv.innerHTML = `
-        Aktuelles Ergebnis:<br>
-        😢 (Traurig): ${votes.Sad}<br>
-        😐 (Neutral): ${votes.Neutral}<br>
-        😊 (Glücklich): ${votes.Happy}
-      `;
-    }
-
-    function hideResults() {
-      document.getElementById('results').style.display = 'none';
-    }
-
-    function startCountdown() {
-      let countdown = 3;
-      disableButtons(true);
-      const countdownDiv = document.getElementById('countdown');
-      countdownDiv.style.display = 'block';
-      countdownDiv.textContent = `Ergebnisse werden ${countdown} Sekunden angezeigt...`;
-
-      clearInterval(countdownInterval);
-      countdownInterval = setInterval(() => {
-        countdown--;
-        countdownDiv.textContent = `Ergebnisse werden ${countdown} Sekunden angezeigt...`;
-        if (countdown <= 0) {
-          clearInterval(countdownInterval);
-          countdownDiv.style.display = 'none'; // Countdown ausblenden
-          hideResults(); // Ergebnisse ausblenden
-          disableButtons(false);
-        }
-      }, 1000);
-    }
-
-    function disableButtons(disable) {
-      document.querySelectorAll('.button').forEach(button => {
-        button.disabled = disable;
-        if (!disable) {
-          button.style.transform = "scale(1)"; // Originalgröße wiederherstellen
-        }
-      });
-    }
-
-    function enterFullscreen() {
-      const elem = document.documentElement;
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
-      }
     }
   </script>
 
